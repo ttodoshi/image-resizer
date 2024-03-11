@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/nfnt/resize"
 	"image"
-	"image-cropper/internal/ports"
+	"image-resizer/internal/ports"
 	"image/png"
 	"io"
 )
@@ -16,7 +16,7 @@ func NewImageProcessor() ports.ImageProcessor {
 	return &imageProcessor{}
 }
 
-func (i *imageProcessor) Process(resultWriter io.Writer, imageReader io.Reader, maxWidth, maxHeight uint) error {
+func (i *imageProcessor) Process(resultWriter io.Writer, imageReader io.Reader, options ports.Options) error {
 	// Decode image
 	img, _, err := image.Decode(imageReader)
 	if err != nil {
@@ -24,17 +24,21 @@ func (i *imageProcessor) Process(resultWriter io.Writer, imageReader io.Reader, 
 		return err
 	}
 
-	// Determine new dimensions while preserving aspect ratio
 	var newWidth, newHeight uint
-	width := uint(img.Bounds().Dx())
-	height := uint(img.Bounds().Dy())
+	if options.SaveProportions {
+		width := uint(img.Bounds().Dx())
+		height := uint(img.Bounds().Dy())
 
-	if width > height {
-		newWidth = maxWidth
-		newHeight = maxHeight * height / width
+		if width > height {
+			newWidth = options.MaxWidth
+			newHeight = options.MaxHeight * height / width
+		} else {
+			newHeight = options.MaxHeight
+			newWidth = options.MaxWidth * width / height
+		}
 	} else {
-		newHeight = maxHeight
-		newWidth = maxWidth * width / height
+		newWidth = options.MaxWidth
+		newHeight = options.MaxHeight
 	}
 
 	// Resize the image with calculated dimensions

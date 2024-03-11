@@ -1,12 +1,8 @@
-# Console Image Resizer
+# Image Resizer
 
-## Build
+## Console
 
-```shell
-make build
-```
-
-## Usage
+### Usage
 
 simple usage
 
@@ -31,4 +27,18 @@ Usage of ./bin/app:
         width in pixels (default 512)
   -o string
         output directory (default "resized")
+```
+
+## Rest API
+
+GET / with attaching file as form data "file"
+
+```
+Params
+  - height           uint
+        height in pixels
+  - width            uint
+        width in pixels
+  - save-proportions bool
+        save proportions 
 ```

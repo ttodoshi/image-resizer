@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"image-cropper/internal/domain"
-	"image-cropper/internal/ports"
+	"image-resizer/internal/domain"
+	"image-resizer/internal/ports"
 	_ "image/jpeg"
 	"os"
 	"path/filepath"
@@ -89,7 +89,11 @@ func processFile(imagePath string, imageProcessor ports.ImageProcessor, flags Fl
 		}
 	}(outputFile)
 
-	err = imageProcessor.Process(outputFile, file, *flags.maxWidth, *flags.maxHeight)
+	err = imageProcessor.Process(outputFile, file, ports.Options{
+		MaxWidth:        *flags.maxWidth,
+		MaxHeight:       *flags.maxHeight,
+		SaveProportions: true,
+	})
 	if err != nil {
 		return
 	}

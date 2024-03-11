@@ -1,4 +1,4 @@
-module image-cropper
+module image-resizer
 
 go 1.22
 
