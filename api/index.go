@@ -1,14 +1,15 @@
-package api
+package handler
 
 import (
-	"image-resizer/internal/domain"
-	"image-resizer/internal/ports"
+	"fmt"
+	"github.com/nfnt/resize"
+	"image"
+	"image/png"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 )
-
-var imageProcessor = domain.NewImageProcessor()
 
 func ResizeImage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -29,7 +30,7 @@ func ResizeImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = imageProcessor.Process(w, file, ports.Options{
+	err = ProcessImage(w, file, Options{
 		MaxWidth:        uint(width),
 		MaxHeight:       uint(height),
 		SaveProportions: r.URL.Query().Get("save-proportions") != "false",
@@ -53,4 +54,47 @@ func parseMultipartFile(r *http.Request) (multipart.File, error, func()) {
 			return
 		}
 	}
+}
+
+type Options struct {
+	MaxWidth        uint
+	MaxHeight       uint
+	SaveProportions bool
+}
+
+func ProcessImage(resultWriter io.Writer, imageReader io.Reader, options Options) error {
+	// Decode image
+	img, _, err := image.Decode(imageReader)
+	if err != nil {
+		fmt.Printf("error decoding image: %v\n", err)
+		return err
+	}
+
+	var newWidth, newHeight uint
+	if options.SaveProportions {
+		width := uint(img.Bounds().Dx())
+		height := uint(img.Bounds().Dy())
+
+		if width > height {
+			newWidth = options.MaxWidth
+			newHeight = options.MaxHeight * height / width
+		} else {
+			newHeight = options.MaxHeight
+			newWidth = options.MaxWidth * width / height
+		}
+	} else {
+		newWidth = options.MaxWidth
+		newHeight = options.MaxHeight
+	}
+
+	// Resize the image with calculated dimensions
+	resizedImg := resize.Resize(newWidth, newHeight, img, resize.Lanczos3)
+
+	err = png.Encode(resultWriter, resizedImg)
+	if err != nil {
+		fmt.Printf("error writing image: %v\n", err)
+		return err
+	}
+
+	return nil
 }

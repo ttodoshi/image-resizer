@@ -3,8 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"image-resizer/internal/domain"
-	"image-resizer/internal/ports"
+	handler "image-resizer/api"
 	_ "image/jpeg"
 	"os"
 	"path/filepath"
@@ -16,10 +15,8 @@ func main() {
 
 	flags.processFlags()
 
-	imageProcessor := domain.NewImageProcessor()
-
 	for _, imagePath := range flag.Args() {
-		processFile(imagePath, imageProcessor, flags)
+		processFile(imagePath, flags)
 	}
 }
 
@@ -63,7 +60,7 @@ func (f *Flags) processFlags() {
 	}
 }
 
-func processFile(imagePath string, imageProcessor ports.ImageProcessor, flags Flags) {
+func processFile(imagePath string, flags Flags) {
 	file, err := os.Open(imagePath)
 	if err != nil {
 		fmt.Printf("failed to open file: %v\n", err)
@@ -89,7 +86,7 @@ func processFile(imagePath string, imageProcessor ports.ImageProcessor, flags Fl
 		}
 	}(outputFile)
 
-	err = imageProcessor.Process(outputFile, file, ports.Options{
+	err = handler.ProcessImage(outputFile, file, handler.Options{
 		MaxWidth:        *flags.maxWidth,
 		MaxHeight:       *flags.maxHeight,
 		SaveProportions: true,

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"image-resizer/api"
+	handler "image-resizer/api"
 	"log"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/", api.ResizeImage)
+	http.HandleFunc("/", handler.ResizeImage)
 
 	log.Println("Starting server on port :8080")
 

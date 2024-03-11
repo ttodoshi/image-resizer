@@ -31,14 +31,16 @@ Usage of ./bin/app:
 
 ## Rest API
 
-GET / with attaching file as form data "file"
-
 ```
-Params
+GET /
+Params:
   - height           uint
         height in pixels
   - width            uint
         width in pixels
   - save-proportions bool
         save proportions 
+
+Multipart form data
+- "file"
 ```
