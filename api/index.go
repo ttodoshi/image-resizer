@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/nfnt/resize"
-	"image"
+	"image-resizer/pkg/image/decoder"
 	"image/png"
 	"io"
 	"mime/multipart"
@@ -62,9 +62,9 @@ type Options struct {
 	SaveProportions bool
 }
 
-func ProcessImage(resultWriter io.Writer, imageReader io.Reader, options Options) error {
+func ProcessImage(resultWriter io.Writer, file multipart.File, options Options) error {
 	// Decode image
-	img, _, err := image.Decode(imageReader)
+	img, err := decoder.DecodeImage(file)
 	if err != nil {
 		fmt.Printf("error decoding image: %v\n", err)
 		return err
